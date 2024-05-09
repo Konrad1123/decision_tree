@@ -1,0 +1,75 @@
+#Importowanie bibliotek i ładowanie danych:
+import pandas as pd
+from sklearn.datasets import load_breast_cancer
+
+data = load_breast_cancer()
+dataset = pd.DataFrame(data=data['data'], columns = data['feature_names'])
+dataset
+
+#Przygotowanie danych do modelowania:
+from sklearn.model_selection import train_test_split
+x = dataset.copy()
+y = data['target']
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.33) 
+
+#Tworzenie i trenowanie modelu drzewa decyzyjnego:
+from sklearn.tree import DecisionTreeClassifier
+clf = DecisionTreeClassifier()
+clf = clf.fit(x_train, y_train)
+
+clf.get_params()
+
+x_test
+
+#Używasz modelu do generowania przewidywań na zbiorze testowym.
+predictions = clf.predict(x_test)
+predictions
+
+#Pokaż różnicę między drzewem, które nie ma kryteriów zatrzymania, a takim, które je ma
+clf.predict_proba(x_test)
+
+#dokładność
+from sklearn.metrics import accuracy_score
+accuracy_score(y_test, predictions)
+
+#macierz pomyłek
+from sklearn.metrics import confusion_matrix
+confusion_matrix(y_test, predictions, labels = [0,1])
+
+#precyzja
+from sklearn.metrics import precision_score 
+precision_score(y_test, predictions)
+
+#odzysk
+from sklearn.metrics import recall_score
+recall_score(y_test, predictions)
+
+#raport klasyfikacji
+from sklearn.metrics import classification_report
+print(classification_report(y_test, predictions, target_names = ['malignant', 'benign']))
+
+feature_names = x.columns
+feature_names
+
+#ważność cech (feature importance), co pozwala zrozumieć, które cechy miały największy wpływ na decyzje podjęte przez drzewo decyzyjne.
+clf.feature_importances_
+
+#DataFrame z ważnością cech i sortowanie ich w celu identyfikacji najważniejszych cech.
+feature_importance = pd.DataFrame(clf.feature_importances_, index = feature_names).sort_values(0, ascending=False)
+feature_importance
+
+feature_importance.head(10).plot(kind='bar')
+
+#Korzystając z biblioteki Matplotlib i funkcji plot_tree z Scikit-learn, wizualizacja utworzyła drzewo decyzyjne, co pozwala na wizualną ocenę procesu decyzyjnego modelu.
+
+from sklearn import tree
+from matplotlib import pyplot as plt
+
+fig = plt.figure(figsize=(25,20))
+_ = tree.plot_tree(clf, 
+                   feature_names=feature_names,  
+                   class_names={0:'Malignant', 1:'Benign'},
+                   filled=True,
+                  fontsize=12)
+
+
